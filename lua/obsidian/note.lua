@@ -36,6 +36,7 @@ local CODE_BLOCK_PATTERN = "^%s*```[%w_-]*$"
 ---@field aliases string[]
 ---@field tags string[]
 ---@field path obsidian.Path|?
+---@field user_prompt_id string|?
 ---@field metadata table
 ---@field has_frontmatter boolean|?
 ---@field frontmatter_end_line integer|?
@@ -330,6 +331,7 @@ Note.new = function(id, aliases, tags, path, title)
   self.metadata = nil
   self.has_frontmatter = nil
   self.frontmatter_end_line = nil
+  self.user_prompt_id = original_id
   return setmetatable(self, Note)
 end
 
@@ -1225,12 +1227,12 @@ Note.status = function(self, update_backlink)
   status.chars = wc.visual_chars or wc.chars
   status.properties = vim.tbl_count(self:frontmatter()) -- TODO: should be zero if no frontmatter
   local path = tostring(self.path)
-  if self and (update_backlink or backlink_cache[path] == nil) then -- HACK:
+  if update_backlink or backlink_cache[path] == nil then
     local num_backlinks = #self:backlinks {}
     status.backlinks = num_backlinks
     backlink_cache[path] = num_backlinks
   else
-    status.backlinks = backlink_cache[path] or 0
+    status.backlinks = backlink_cache[path]
   end
   return status
 end
