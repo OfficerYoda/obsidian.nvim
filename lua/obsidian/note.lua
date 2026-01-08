@@ -35,6 +35,7 @@ local CODE_BLOCK_PATTERN = "^%s*```[%w_-]*$"
 ---@field aliases string[]
 ---@field tags string[]
 ---@field path obsidian.Path|?
+---@field user_prompt_id string|?
 ---@field metadata table
 ---@field has_frontmatter boolean|?
 ---@field frontmatter_end_line integer|?
@@ -282,13 +283,14 @@ end
 --- @param opts obsidian.note.NoteOpts
 --- @return obsidian.Note
 Note.create = function(opts)
+  local old_id = opts.id -- The name passed in the user prompt
   local new_id, path = Note._resolve_id_path(opts)
-  opts = vim.tbl_extend("keep", opts, { aliases = {}, tags = {} })
+  opts = vim.tbl_extend("keep", opts, { aliases = { old_id }, tags = {} })
 
   -- Add the title as an alias.
   --- @type string[]
   local aliases = opts.aliases
-  local note = Note.new(new_id, aliases, opts.tags, path)
+  local note = Note.new(new_id, aliases, opts.tags, path, old_id)
 
   -- Ensure the parent directory exists.
   local parent = path:parent()
@@ -311,8 +313,9 @@ end
 --- @param aliases string[]
 --- @param tags string[]
 --- @param path string|obsidian.Path|?
+--- @param user_prompt_id string|?
 --- @return obsidian.Note
-Note.new = function(id, aliases, tags, path)
+Note.new = function(id, aliases, tags, path, user_prompt_id)
   local self = {}
   self.id = id
   self.aliases = aliases and aliases or {}
@@ -321,6 +324,7 @@ Note.new = function(id, aliases, tags, path)
   self.metadata = nil
   self.has_frontmatter = nil
   self.frontmatter_end_line = nil
+  self.user_prompt_id = original_id
   return setmetatable(self, Note)
 end
 
@@ -618,8 +622,10 @@ end
 ---
 ---@return string
 Note.display_name = function(self)
-  -- if self.title then
-  --   return self.title
+  if self.user_prompt_id then
+    return self.user_prompt_id
+  end
+
   if #self.aliases > 0 then
     return self.aliases[#self.aliases]
   end
@@ -1217,12 +1223,12 @@ Note.status = function(self, update_backlink)
   status.chars = wc.visual_chars or wc.chars
   status.properties = vim.tbl_count(self:frontmatter()) -- TODO: should be zero if no frontmatter
   local path = tostring(self.path)
-  if self and (update_backlink or backlink_cache[path] == nil) then -- HACK:
+  if update_backlink or backlink_cache[path] == nil then
     local num_backlinks = #self:backlinks {}
     status.backlinks = num_backlinks
     backlink_cache[path] = num_backlinks
   else
-    status.backlinks = backlink_cache[path] or 0
+    status.backlinks = backlink_cache[path]
   end
   return status
 end
