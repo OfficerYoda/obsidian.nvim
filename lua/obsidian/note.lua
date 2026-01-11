@@ -125,13 +125,14 @@ end
 ---
 ---@param id string The note ID
 ---@param dir obsidian.Path The note path
+---@param template string|? The template being used
 ---@return obsidian.Path
 ---@private
-Note._generate_path = function(id, dir)
+Note._generate_path = function(id, dir, template)
   ---@type obsidian.Path
   local path
 
-  path = Path.new(Obsidian.opts.note_path_func { id = id, dir = dir })
+  path = Path.new(Obsidian.opts.note_path_func { id = id, dir = dir, template = template })
 
   -- NOTE: `opts.dir` should always be absolute, but for extra safety we handle the case where
   if not path:is_absolute() and (dir:is_absolute() or not dir:is_parent_of(path)) then
@@ -214,7 +215,7 @@ end
 ---@return obsidian.Path path
 ---@private
 Note._resolve_id_path = function(opts)
-  local id, dir = opts.id, opts.dir
+  local id, dir, template = opts.id, opts.dir, opts.template
   local creation_opts = Note._get_creation_opts(opts or {})
 
   if id then
@@ -273,7 +274,7 @@ Note._resolve_id_path = function(opts)
   dir = base_dir
 
   -- Generate path.
-  local path = Note._generate_path(id, dir)
+  local path = Note._generate_path(id, dir, template)
 
   return id, path
 end
@@ -324,7 +325,7 @@ Note.new = function(id, aliases, tags, path, user_prompt_id)
   self.metadata = nil
   self.has_frontmatter = nil
   self.frontmatter_end_line = nil
-  self.user_prompt_id = original_id
+  self.user_prompt_id = user_prompt_id
   return setmetatable(self, Note)
 end
 
