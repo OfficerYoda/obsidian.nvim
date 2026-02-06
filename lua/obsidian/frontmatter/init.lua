@@ -1,8 +1,8 @@
 local M = {}
 local yaml = require "obsidian.yaml"
-local log = require "obsidian.log"
 local validator = require "obsidian.frontmatter.validator"
 
+---@param list string[]
 local function sort_by_list(list)
   return function(a, b)
     local a_idx, b_idx = nil, nil
@@ -14,11 +14,11 @@ local function sort_by_list(list)
         b_idx = i
       end
     end
-    if a_idx and b_idx then
+    if a_idx ~= nil and b_idx ~= nil then
       return a_idx < b_idx
-    elseif a_idx then
+    elseif a_idx ~= nil then
       return true
-    elseif b_idx then
+    elseif b_idx ~= nil then
       return false
     else
       return a < b
@@ -54,8 +54,9 @@ end
 --- Parse and validate info from frontmatter.
 ---
 ---@param frontmatter_lines string[]
----@return { id: string, tags: string[], aliases: string[] }
----@return table<string, any>
+---@return { id: string|?, tags: string[]|?, aliases: string[]|? }
+---@return table<string, any> metadata
+---@return string[] errors
 M.parse = function(frontmatter_lines, path)
   local frontmatter = table.concat(frontmatter_lines, "\n")
   local ok, data = pcall(yaml.loads, frontmatter)
@@ -63,14 +64,14 @@ M.parse = function(frontmatter_lines, path)
     data = {}
   end
   if not ok then
-    return {}, {}
+    return {}, {}, {}
   end
-  local metadata, ret = {}, {}
+  local metadata, ret, errors = {}, {}, {}
   for k, v in pairs(data) do
-    if validator[k] then
+    if validator[k] ~= nil then
       local value, err = validator[k](v, path)
       if err ~= nil then
-        log.warn(err)
+        errors[#errors + 1] = err
       else
         ret[k] = value
       end
@@ -79,7 +80,7 @@ M.parse = function(frontmatter_lines, path)
     end
   end
 
-  return ret, metadata
+  return ret, metadata, errors
 end
 
 return M

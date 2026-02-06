@@ -2,8 +2,7 @@
 return {
   -- TODO: remove these in 4.0.0
   legacy_commands = true,
-  note_frontmatter_func = require("obsidian.builtin").frontmatter,
-  disable_frontmatter = false,
+
   ---@class obsidian.config.StatuslineOpts
   ---
   ---@field format? string
@@ -13,9 +12,6 @@ return {
     enabled = true,
   },
 
-  -- TODO:: replace with more general options before 4.0.0
-  follow_url_func = vim.ui.open,
-  follow_img_func = vim.ui.open,
   notes_subdir = nil,
   new_notes_location = "current_dir",
 
@@ -30,6 +26,32 @@ return {
   markdown_link_func = require("obsidian.builtin").markdown_link,
   preferred_link_style = "wiki",
   open_notes_in = "current",
+
+  ---@class obsidian.config.NoteOpts
+  ---
+  ---Default template to use, relative to template.folder or an absolute path.
+  ---The default looks like:
+  ---
+  ---```markdown
+  ------
+  ---id: {{id}}
+  ---aliases: []
+  ---tags: []
+  ------
+  ---```
+  ---
+  ---@field template string|?
+  note = {
+    template = (function()
+      local root = vim.iter(vim.api.nvim_list_runtime_paths()):find(function(path)
+        return vim.endswith(path, "obsidian.nvim")
+      end)
+      if not root then
+        return nil
+      end
+      return vim.fs.joinpath(root, "data/default_template.md")
+    end)(),
+  },
 
   ---@class obsidian.config.FrontmatterOpts
   ---
@@ -50,18 +72,20 @@ return {
 
   ---@class obsidian.config.TemplateOpts
   ---
+  ---@field enabled boolean|?
   ---@field folder string|obsidian.Path|?
-  ---@field date_format string|?
-  ---@field time_format string|?
+  ---@field date_format string
+  ---@field time_format string
   --- A map for custom variables, the key should be the variable and the value a function.
   --- Functions are called with obsidian.TemplateContext objects as their sole parameter.
   --- See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Template#substitutions
   ---@field substitutions table<string, (fun(ctx: obsidian.TemplateContext):string)|(fun(): string)|string>|?
   ---@field customizations table<string, obsidian.config.CustomTemplateOpts>|?
   templates = {
+    enabled = true,
     folder = nil,
-    date_format = nil,
-    time_format = nil,
+    date_format = "YYYY-MM-DD",
+    time_format = "HH:mm",
     substitutions = {},
 
     ---@class obsidian.config.CustomTemplateOpts
@@ -137,6 +161,7 @@ return {
 
   ---@class obsidian.config.DailyNotesOpts
   ---
+  ---@field enabled? boolean
   ---@field folder? string
   ---@field date_format? string
   ---@field alias_format? string
@@ -144,8 +169,9 @@ return {
   ---@field default_tags? string[]
   ---@field workdays_only? boolean
   daily_notes = {
+    enabled = true,
     folder = nil,
-    date_format = "%Y-%m-%d",
+    date_format = "YYYY-MM-DD",
     alias_format = nil,
     default_tags = { "daily-notes" },
     workdays_only = true,
@@ -165,6 +191,7 @@ return {
   ---@class obsidian.config.UIOpts
   ---
   ---@field enable boolean
+  ---@field enabled boolean
   ---@field ignore_conceal_warn boolean
   ---@field update_debounce integer
   ---@field max_file_length integer|?
@@ -269,9 +296,13 @@ return {
   ---
   ---Function to do the opening, default to vim.ui.open
   ---@field func? fun(uri: string)
+  ---
+  ---URI scheme whitelist, new values are appended to this list, and URIs with schemes in this list, will not be prompted to confirm opening
+  ---@field schemes? string[]
   open = {
     use_advanced_uri = false,
     func = vim.ui.open,
+    schemes = { "https", "http", "file", "mailto" },
   },
 
   ---@class obsidian.config.CheckboxOpts

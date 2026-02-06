@@ -448,6 +448,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "S1RENS",
+      "name": "S1RENS",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57037675?v=4",
+      "profile": "https://github.com/S1RENS",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "CaeChao",
+      "name": "CaeChao",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47220170?v=4",
+      "profile": "https://caechao.github.io",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "tartansandal",
+      "name": "Kahlil Hodgson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3327775?v=4",
+      "profile": "https://github.com/tartansandal",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }

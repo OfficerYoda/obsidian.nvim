@@ -17,16 +17,12 @@ M.daily_note_path = function(datetime)
   local options = Obsidian.opts
 
   if options.daily_notes.folder ~= nil then
-    ---@type obsidian.Path
-    ---@diagnostic disable-next-line: assign-type-mismatch
     path = path / options.daily_notes.folder
   elseif options.notes_subdir ~= nil then
-    ---@type obsidian.Path
-    ---@diagnostic disable-next-line: assign-type-mismatch
     path = path / options.notes_subdir
   end
 
-  local id = tostring(os.date(options.daily_notes.date_format, datetime))
+  local id = tostring(util.format_date(datetime, options.daily_notes.date_format))
 
   path = path / (id .. ".md")
 
@@ -53,7 +49,7 @@ local _daily = function(datetime, opts)
   ---@type string|?
   local alias
   if options.daily_notes.alias_format ~= nil then
-    alias = tostring(os.date(options.daily_notes.alias_format, datetime))
+    alias = tostring(util.format_date(datetime, options.daily_notes.alias_format))
   end
 
   ---@type obsidian.Note
@@ -139,7 +135,8 @@ M.pick = function(offset_start, offset_end, callback)
   for offset = offset_end, offset_start, -1 do
     local datetime = os.time() + (offset * 3600 * 24)
     local daily_note_path = M.daily_note_path(datetime)
-    local daily_note_alias = tostring(os.date(Obsidian.opts.daily_notes.alias_format or "%A %B %-d, %Y", datetime))
+    local daily_note_alias =
+      tostring(util.format_date(datetime, Obsidian.opts.daily_notes.alias_format or "%A %B %-d, %Y"))
     if offset == 0 then
       daily_note_alias = daily_note_alias .. " @today"
     elseif offset == -1 then

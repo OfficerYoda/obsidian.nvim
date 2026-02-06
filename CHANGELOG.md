@@ -9,13 +9,83 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for moment.js style date format for:
+  - `opts.templates.date_format`
+  - `opts.templates.time_format`
+  - `opts.daily_notes.date_format`
+  - `opts.daily_notes.alias_format`
+
+### Fixed
+
+- Fixed checkbox toggle affecting incorrect lines when stale visual selection marks are present.
+
+## [v3.15.8](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.8) - 2026-02-04
+
+### Added
+
+- Added `opts.daily_notes.enabled`.
+- Added `opts.templates.enabled`.
+- Experimental `make checklua` to use `emmylua_check` to type check.
+
+### Changed
+
+- `completion`'s create note action also use `opts.note.template`.
+- `create_new_note` action also use `opts.note.template`.
+
+### Fixed
+
+- Snacks picker actions now respect `allow_multiple` picker option.
+- Template customizations falls back to global configuration if not provided
+
+## [v3.15.7](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.7) - 2026-01-29
+
+### Fixed
+
+- Releases will properly trigger syncing `docs/` to Github wiki.
+
+## [v3.15.6](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.6) - 2026-01-29
+
+### Added
+
+- `actions.toggle_checkbox` can be mapped in visual mode.
+- `actions.add_property` to add key values to frontmatter.
+- A new `opts.note` config module.
+- `opts.note.template` that allows controlling the default template used by `:Obsidian new`.
+
+### Changed
+
+- No longer throw frontmatter warnings with searches that loading notes.
+- Regression of adding title back as a field in `Note` class.
+
+### Fixed
+
+- `:Obsidian new` and `:Obsidian new_from_template` will properly add input as alias.
+
+## [v3.15.5](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.5) - 2026-01-28
+
+### Added
+
 - Export footer content as a buffer local variable `vim.b.obsidian_status`.
+- Open any `[](uri)`, prompt for schemes outside whitelist `opts.open.schemes`.
+
+### Changed
+
+- Bare urls, file urls, mailto urls will no longer work, always enclose them in markdown list like `[my email](mailto:example@gmail.com)`
+
+### Fixed
+
+- Snacks picker actions now return the correct format for `mappings.lua`.
+- Custom deprecate function to avoid the case `vim.deprecate` being set to no-op and users don't get deprecation warnings.
 
 ## [v3.15.4](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.4) - 2026-01-10
 
 ### Added
 
 - Anchors will support all unicode symbols.
+
+### Changed
+
+- Mappable actions are moved to `actions.lua`.
 
 ### Changed
 
@@ -617,7 +687,7 @@ There's a lot of new features and improvements here that I'm really excited abou
    We also support links to headers within the same note, like for a table of contents, e.g. `[[#Heading 1]]`, `[[#heading-1|Heading]]`, `[[#^block-1]]`.
 
 1. 📲 A basic callback system to let you easily customize obisidian.nvim's behavior even more. There are currently 4 events: `post_setup`, `enter_note`, `pre_write_note`, and `post_set_workspace`. You can define a function for each of these in your config.
-2. 🔭 Improved picker integrations (especially for telescope), particular for the `:ObsidianTags` command. See <https://github.com/epwalsh/obsidian.nvim/discussions/450> for a demo.
+1. 🔭 Improved picker integrations (especially for telescope), particular for the `:ObsidianTags` command. See <https://github.com/epwalsh/obsidian.nvim/discussions/450> for a demo.
 
 Full changelog below 👇
 

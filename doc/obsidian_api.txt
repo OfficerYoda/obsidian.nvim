@@ -22,6 +22,7 @@ Class ~
 
 Fields ~
 {id} `(string)`
+{title} `(string)` readable name for note
 {aliases} `(string[])`
 {tags} `(string[])`
 {path} `(obsidian.Path|)`?
@@ -66,15 +67,16 @@ Creates a new note
 
 ------------------------------------------------------------------------------
                                                                     *Note.new()*
-                  `Note.new`({id}, {aliases}, {tags}, {path})
+              `Note.new`({id}, {aliases}, {tags}, {path}, {title})
 Instantiates a new Note object
 
 Keep in mind that you have to call `note:save(...)` to create/update the note on disk.
 
 @param id string|number
-@param aliases string[]
-@param tags string[]
+@param aliases string[]|?
+@param tags string[]|?
 @param path string|obsidian.Path|?
+@param title string|?
 @return obsidian.Note
 
 ------------------------------------------------------------------------------
@@ -246,15 +248,9 @@ Parameters ~
 {opts} `(obsidian.note.LoadOpts|)`?
 
 Return ~
-`(obsidian.Note)`
-
-------------------------------------------------------------------------------
-                                                              *Note.frontmatter*
-                               `Note.frontmatter`
-Get the frontmatter table to save.
-
+`(obsidian.Note)` note
 Return ~
-`(table)`
+`(string[])` warnings
 
 ------------------------------------------------------------------------------
                                                       *Note.frontmatter_lines()*
@@ -381,7 +377,7 @@ Return ~
                                                                   *Note.links()*
                               `Note.links`({self})
 Return ~
-`(obsidian.LinkMatch)`
+`(obsidian.LinkMatch[])`
 
 ------------------------------------------------------------------------------
                                                             *Note.format_link()*
@@ -491,6 +487,16 @@ Fields ~
 
 ==============================================================================
 ------------------------------------------------------------------------------
+Class ~
+{obsidian.workspace.WorkspaceSpec}
+
+Fields ~
+{path} `(string|(fun(): string)|obsidian.Path|(fun(): obsidian.Path))`
+{name} `(string|)`?
+{strict} `(boolean|? If)` true, the workspace root will be fixed to 'path' instead of the vault root (if different).
+{overrides} `(obsidian.config?)`
+
+------------------------------------------------------------------------------
                                                                      *Workspace*
                                   `Workspace`
 Each workspace represents a working directory (usually an Obsidian vault) along with
@@ -582,7 +588,8 @@ Fields ~
 {name} `(string|? The)` final path component, if any.
 {suffix} `(string|? The)` final extension of the path, if any.
 {suffixes} `(string[])` A list of all of the path's extensions.
-{stem} `(string|? The)` final path component, without its suffix.
+{stem} `(string)` The final path component, without its suffix.
+div(string|obsidian.Path): obsidian.Path
 
 ------------------------------------------------------------------------------
                                                             *Path.is_path_obj()*

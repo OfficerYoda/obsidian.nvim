@@ -299,6 +299,11 @@ Please read the [CONTRIBUTING](https://github.com/obsidian-nvim/obsidian.nvim/bl
       <td align="center" valign="top" width="14.28%"><a href="https://sundar.guru"><img src="https://avatars.githubusercontent.com/u/76529072?v=4?s=100" width="100px;" alt="Sundar Gurumurthy"/><br /><sub><b>Sundar Gurumurthy</b></sub></a><br /><a href="#code-neuroconvergent" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://apalermo01.com/"><img src="https://avatars.githubusercontent.com/u/64085614?v=4?s=100" width="100px;" alt="apalermo01"/><br /><sub><b>apalermo01</b></sub></a><br /><a href="#code-apalermo01" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/S1RENS"><img src="https://avatars.githubusercontent.com/u/57037675?v=4?s=100" width="100px;" alt="S1RENS"/><br /><sub><b>S1RENS</b></sub></a><br /><a href="#code-S1RENS" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://caechao.github.io"><img src="https://avatars.githubusercontent.com/u/47220170?v=4?s=100" width="100px;" alt="CaeChao"/><br /><sub><b>CaeChao</b></sub></a><br /><a href="#code-CaeChao" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/tartansandal"><img src="https://avatars.githubusercontent.com/u/3327775?v=4?s=100" width="100px;" alt="Kahlil Hodgson"/><br /><sub><b>Kahlil Hodgson</b></sub></a><br /><a href="#code-tartansandal" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 

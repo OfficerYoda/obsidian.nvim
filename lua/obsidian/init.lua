@@ -3,12 +3,13 @@ local log = require "obsidian.log"
 local obsidian = {}
 
 obsidian.api = require "obsidian.api"
+obsidian.actions = require "obsidian.actions"
 obsidian.async = require "obsidian.async"
 obsidian.Client = require "obsidian.client"
 obsidian.commands = require "obsidian.commands"
 obsidian.completion = require "obsidian.completion"
 obsidian.config = require "obsidian.config"
-obsidian.log = require "obsidian.log"
+obsidian.log = log
 obsidian.img_paste = require "obsidian.img_paste"
 obsidian.Note = require "obsidian.note"
 obsidian.Path = require "obsidian.path"
@@ -63,7 +64,7 @@ obsidian.setup = function(user_opts)
   local docs_dir = obsidian.api.docs_dir()
 
   if docs_dir then
-    Obsidian.workspaces[#Obsidian.workspaces + 1] = {
+    Obsidian.workspaces[#Obsidian.workspaces + 1] = obsidian.Workspace.new {
       path = docs_dir,
       root = docs_dir,
       name = ".obsidian.wiki",
@@ -74,16 +75,6 @@ obsidian.setup = function(user_opts)
   local client = obsidian.Client.new() -- TODO: remove in 4.0.0
 
   log.set_level(Obsidian.opts.log_level)
-
-  obsidian.commands.install()
-
-  -- Setup UI add-ons.
-  local has_no_renderer = not (
-    obsidian.api.get_plugin_info "render-markdown.nvim" or obsidian.api.get_plugin_info "markview.nvim"
-  )
-  if has_no_renderer and Obsidian.opts.ui.enable then
-    require("obsidian.ui").setup(Obsidian.workspace, Obsidian.opts.ui)
-  end
 
   Obsidian.picker = obsidian.Picker.get()
 

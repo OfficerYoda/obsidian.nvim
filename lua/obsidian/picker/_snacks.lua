@@ -13,14 +13,32 @@ local function notes_mappings(mapping)
     local opts = { win = { input = { keys = {} } }, actions = {} }
     for k, v in pairs(mapping) do
       local name = string.gsub(v.desc, " ", "_")
-      opts.win.input.keys = {
-        [k] = { name, mode = { "n", "i" }, desc = v.desc },
-      }
+      opts.win.input.keys[k] = { name, mode = { "n", "i" }, desc = v.desc }
       opts.actions[name] = function(picker, item)
         picker:close()
-        vim.schedule(function()
-          v.callback(item.user_data or item._path)
-        end)
+        if v.allow_multiple then
+          local selected = picker:selected { fallback = true }
+          ---@type obsidian.PickerEntry[]
+          local entries = {}
+          for _, sel in ipairs(selected) do
+            table.insert(entries, {
+              filename = sel._path,
+              user_data = sel.user_data or sel.value or sel.text,
+            })
+          end
+          vim.schedule(function()
+            v.callback(unpack(entries))
+          end)
+        else
+          ---@type obsidian.PickerEntry
+          local entry = {
+            filename = item._path,
+            user_data = item.user_data or item.value or item.text,
+          }
+          vim.schedule(function()
+            v.callback(entry)
+          end)
+        end
       end
     end
     return opts

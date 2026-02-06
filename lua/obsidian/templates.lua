@@ -8,13 +8,18 @@ local M = {}
 --- Resolve a template name to a path.
 ---
 ---@param template_name string|obsidian.Path
----@param templates_dir obsidian.Path
+---@param templates_dir obsidian.Path|?
 ---
 ---@return obsidian.Path
 M.resolve_template = function(template_name, templates_dir)
   ---@type obsidian.Path|?
   local template_path
-  local paths_to_check = { templates_dir / tostring(template_name), Path.new(template_name) }
+  local paths_to_check = { Path.new(template_name) }
+
+  if templates_dir then
+    table.insert(paths_to_check, templates_dir and templates_dir / tostring(template_name))
+  end
+
   for _, path in ipairs(paths_to_check) do
     if path:is_file() then
       template_path = path
@@ -42,19 +47,17 @@ end
 ---
 ---@return string
 M.substitute_template_variables = function(text, ctx)
-  local methods = vim.deepcopy(ctx.template_opts.substitutions or {})
+  local methods = vim.deepcopy(Obsidian.opts.templates.substitutions or {})
 
   if not methods["date"] then
     methods["date"] = function()
-      local date_format = ctx.template_opts.date_format or "%Y-%m-%d"
-      return tostring(os.date(date_format))
+      return tostring(util.format_date(os.time(), Obsidian.opts.templates.date_format))
     end
   end
 
   if not methods["time"] then
     methods["time"] = function()
-      local time_format = ctx.template_opts.time_format or "%H:%M"
-      return tostring(os.date(time_format))
+      return tostring(util.format_date(os.time(), Obsidian.opts.templates.time_format))
     end
   end
 
@@ -133,7 +136,7 @@ M.clone_template = function(ctx)
 
   local new_note = Note.from_file(note_path)
 
-  if ctx.partial_note then
+  if ctx.partial_note ~= nil then
     -- Transfer fields from `ctx.partial_note`.
     new_note.id = ctx.partial_note.id
     for _, alias in ipairs(ctx.partial_note.aliases) do

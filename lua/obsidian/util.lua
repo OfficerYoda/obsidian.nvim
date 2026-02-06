@@ -122,20 +122,33 @@ util.match_case = function(prefix, key)
   return table.concat(out_chars, "")
 end
 
----Check if a string is a valid URL.
 ---@param s string
----@return boolean
-util.is_url = function(s)
-  local search = require "obsidian.search"
+---@return string|? scheme
+---@return string|? rest
+local function get_uri_scheme(s)
+  -- scheme per RFC-ish: ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+  local scheme, rest = s:match "^([%a][%w+%-%.]*):(.*)$"
+  if not scheme or not rest then
+    return nil
+  end
 
-  if
-    string.match(vim.trim(s), "^" .. search.Patterns["NakedUrl"] .. "$")
-    or string.match(vim.trim(s), "^" .. search.Patterns["FileUrl"] .. "$")
-    or string.match(vim.trim(s), "^" .. search.Patterns["MailtoUrl"] .. "$")
-  then
-    return true
+  -- Avoid treating Windows drive letters as schemes: "C:\foo" or "C:/foo"
+  if #scheme == 1 and rest:match "^[\\/]." then
+    return nil
+  end
+
+  return scheme:lower(), rest
+end
+
+---@param s string
+---@return boolean is_uri
+---@return string|? scheme
+util.is_uri = function(s)
+  local scheme = get_uri_scheme(s)
+  if scheme then
+    return true, scheme
   else
-    return false
+    return false, nil
   end
 end
 
@@ -197,6 +210,20 @@ end
 --- Date helpers ---
 --------------------
 
+--- Format a timestamp with strftime or moment.js date format
+---
+---@param time integer
+---@param fmt string
+---@return string formatted date
+util.format_date = function(time, fmt)
+  if fmt:find "%%" then
+    local time_string = os.date(fmt, time)
+    ---@cast time_string -osdate
+    return time_string
+  end
+  return require("obsidian.lib.moment").format(time, fmt)
+end
+
 ---Determines if the given date is a working day (not weekend)
 ---
 ---@param time integer
@@ -250,6 +277,30 @@ util.working_day_after = function(time)
   end
 end
 
+---Check if a string is a checkbox list item
+---
+---Supported checboox lists:
+--- - [ ] foo
+--- - [x] foo
+--- + [x] foo
+--- * [ ] foo
+--- 1. [ ] foo
+--- 1) [ ] foo
+---
+---@param s string
+---@return boolean
+util.is_checkbox = function(s)
+  -- - [ ] and * [ ] and + [ ]
+  if string.match(s, "%s*[-+*]%s+%[.%]") ~= nil then
+    return true
+  end
+  -- 1. [ ] and 1) [ ]
+  if string.match(s, "%s*%d+[%.%)]%s+%[.%]") ~= nil then
+    return true
+  end
+  return false
+end
+
 util.parse_tags = require("obsidian.parse.tags").parse_tags
 
 ---@param link string
@@ -267,10 +318,8 @@ util.parse_link = function(link, opts)
   if link_type == nil then
     for _, match in ipairs(search.find_refs(link, { exclude = { "Tag" } })) do
       local _, _, m_type = unpack(match)
-      if m_type then
-        link_type = m_type
-        break
-      end
+      link_type = m_type
+      break
     end
   end
 
@@ -282,9 +331,6 @@ util.parse_link = function(link, opts)
   if link_type == "Markdown" then
     link_location = link:gsub("^%[(.-)%]%((.*)%)$", "%2")
     link_name = link:gsub("^%[(.-)%]%((.*)%)$", "%1")
-  elseif link_type == "NakedUrl" or link_type == "FileUrl" or link_type == "MailtoUrl" then
-    link_location = link
-    link_name = link
   elseif link_type == "WikiWithAlias" then
     link = util.unescape_single_backslash(link)
     -- remove boundary brackets, e.g. '[[XXX|YYY]]' -> 'XXX|YYY'
@@ -523,13 +569,13 @@ util.buffer_fn = function(fn)
       for i = 1, #lines - 1 do
         fn(lines[i])
       end
-      buffer = lines[#lines] -- Store remaining partial line
+      buffer = lines[#lines] or "" -- Store remaining partial line
     end
   end
 end
 
 ---@param event string
----@param callback fun(...)
+---@param callback fun(...)|?
 ---@param ... any
 ---@return boolean success
 util.fire_callback = function(event, callback, ...)
@@ -555,10 +601,10 @@ util.in_node = function(node_type)
       return false -- silent fail for 1) a older neovim version 2) don't have markdown parser 3) ci tests
     end
     while node do
-      if node:type() == t then
+      if node.type and node:type() == t then
         return true
       end
-      node = node:parent()
+      node = node.parent and node:parent()
     end
     return false
   end

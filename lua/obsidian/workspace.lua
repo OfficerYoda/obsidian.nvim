@@ -2,6 +2,14 @@ local Path = require "obsidian.path"
 local util = require "obsidian.util"
 local config = require "obsidian.config"
 local log = require "obsidian.log"
+local api = require "obsidian.api"
+
+---@class obsidian.workspace.WorkspaceSpec
+---
+---@field path string|(fun(): string)|obsidian.Path|(fun(): obsidian.Path)
+---@field name string|?
+---@field strict boolean|? If true, the workspace root will be fixed to 'path' instead of the vault root (if different).
+---@field overrides obsidian.config?
 
 --- Each workspace represents a working directory (usually an Obsidian vault) along with
 --- a set of configuration options specific to the workspace.
@@ -121,7 +129,7 @@ Workspace.set = function(workspace)
   end
 
   local dir = workspace.root
-  local options = config.normalize(workspace.overrides, Obsidian._opts)
+  local options = config.normalize(workspace.overrides or {}, Obsidian._opts)
 
   Obsidian.workspace = workspace
   Obsidian.dir = dir
@@ -130,16 +138,22 @@ Workspace.set = function(workspace)
   -- Ensure directories exist.
   dir:mkdir { parents = true }
 
-  if options.notes_subdir then
+  if options.notes_subdir ~= nil then
     (dir / options.notes_subdir):mkdir { parents = true }
   end
 
-  if options.templates.folder then
+  if options.templates.enabled and options.templates.folder then
     (dir / options.templates.folder):mkdir { parents = true }
   end
 
-  if options.daily_notes.folder then
+  if options.daily_notes.enabled and options.daily_notes.folder then
     (dir / options.daily_notes.folder):mkdir { parents = true }
+  end
+
+  -- Setup UI add-ons.
+  local has_no_renderer = not (api.get_plugin_info "render-markdown.nvim" or api.get_plugin_info "markview.nvim")
+  if has_no_renderer and (options.ui.enable or options.ui.enabled) then
+    require("obsidian.ui").setup(workspace, options.ui)
   end
 
   util.fire_callback("post_set_workspace", options.callbacks.post_set_workspace, workspace)

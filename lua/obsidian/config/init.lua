@@ -38,18 +38,38 @@ config.Picker = {
 
 config.default = require "obsidian.config.default"
 
-local tbl_override = function(defaults, overrides)
+local tbl_override = function(defaults, overrides, list_fields)
   local out = vim.tbl_extend("force", defaults, overrides)
   for k, v in pairs(out) do
     if v == vim.NIL then
       out[k] = nil
+    elseif list_fields and list_fields[k] then
+      out[k] = vim.deepcopy(defaults[k])
+      for _, item in ipairs(overrides[k] or {}) do
+        table.insert(out[k], item)
+      end
     end
   end
   return out
 end
 
+--- HACK: because LazyVim and some users by default sets vim.deprecate to no-op
+--- Shows a deprecation message to the user.
+---
+---@param name        string     Deprecated feature (function, API, etc.).
+---@param alternative string|nil Suggested alternative feature.
+---@param version     string     Version when the deprecated function will be removed.
+---
 local function deprecate(name, alternative, version)
-  vim.deprecate(name, alternative, version, "obsidian.nvim", false)
+  -- TODO: until we support 0.11 min
+  -- vim.validate("name", name, "string")
+  -- vim.validate("alternative", alternative, "string", true)
+  -- vim.validate("version", version, "string", true)
+
+  local msg = ("%s is deprecated"):format(name)
+  msg = alternative and ("%s, use %s instead."):format(msg, alternative) or (msg .. ".")
+  msg = ("%s\nFeature will be removed in %s %s"):format(msg, "obsidian.nvim", version)
+  vim.notify_once(msg, vim.log.levels.WARN)
 end
 
 --- Normalize options.
@@ -173,6 +193,7 @@ config.normalize = function(opts, defaults)
   end
 
   if opts.use_advanced_uri ~= nil then
+    opts.open.use_advanced_uri = opts.use_advanced_uri
     opts.use_advanced_uri = nil
     log.warn_once [[The config option 'use_advanced_uri' is deprecated, please use in `open` module instead]]
   end
@@ -302,10 +323,12 @@ See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Keymaps]]
   opts.attachments = tbl_override(defaults.attachments, opts.attachments)
   opts.statusline = tbl_override(defaults.statusline, opts.statusline)
   opts.footer = tbl_override(defaults.footer, opts.footer)
-  opts.open = tbl_override(defaults.open, opts.open)
+  opts.open = tbl_override(defaults.open, opts.open, { schemes = true })
   opts.checkbox = tbl_override(defaults.checkbox, opts.checkbox)
   opts.comment = tbl_override(defaults.comment, opts.comment)
   opts.frontmatter = tbl_override(defaults.frontmatter, opts.frontmatter)
+  opts.search = tbl_override(defaults.search, opts.search)
+  opts.note = tbl_override(defaults.note, opts.note)
 
   ---------------
   -- Validate. --

@@ -22,58 +22,44 @@ T["unescape_single_backslash"]["should correctly remove single backslash"] = fun
   eq(M.unescape_single_backslash "[[foo\\|bar]]", "[[foo|bar]]")
 end
 
-T["is_url"] = new_set()
-
-T["is_url"]["should identify basic URLs"] = function()
-  eq(true, M.is_url "https://example.com")
-end
-
-T["is_url"]["should identify semantic scholar API URLS"] = function()
-  eq(true, M.is_url "https://api.semanticscholar.org/CorpusID:235829052")
-end
-
-T["is_url"]["should identify 'mailto' URLS"] = function()
-  eq(true, M.is_url "mailto:mail@domain.com")
-end
-
 T["is_checkbox"] = new_set()
 
 T["is_checkbox"]["should return true for valid checkbox list items"] = function()
-  eq(true, M._is_checkbox "- [ ] Task 1")
-  eq(true, M._is_checkbox "- [x] Task 1")
-  eq(true, M._is_checkbox "+ [ ] Task 1")
-  eq(true, M._is_checkbox "+ [x] Task 1")
-  eq(true, M._is_checkbox "* [ ] Task 2")
-  eq(true, M._is_checkbox "* [x] Task 2")
-  eq(true, M._is_checkbox "1. [ ] Task 3")
-  eq(true, M._is_checkbox "1. [x] Task 3")
-  eq(true, M._is_checkbox "2. [ ] Task 3")
-  eq(true, M._is_checkbox "10. [ ] Task 3")
-  eq(true, M._is_checkbox "1) [ ] Task")
-  eq(true, M._is_checkbox "10) [ ] Task")
+  eq(true, M.is_checkbox "- [ ] Task 1")
+  eq(true, M.is_checkbox "- [x] Task 1")
+  eq(true, M.is_checkbox "+ [ ] Task 1")
+  eq(true, M.is_checkbox "+ [x] Task 1")
+  eq(true, M.is_checkbox "* [ ] Task 2")
+  eq(true, M.is_checkbox "* [x] Task 2")
+  eq(true, M.is_checkbox "1. [ ] Task 3")
+  eq(true, M.is_checkbox "1. [x] Task 3")
+  eq(true, M.is_checkbox "2. [ ] Task 3")
+  eq(true, M.is_checkbox "10. [ ] Task 3")
+  eq(true, M.is_checkbox "1) [ ] Task")
+  eq(true, M.is_checkbox "10) [ ] Task")
 end
 
 T["is_checkbox"]["should return false for non-checkbox list items"] = function()
-  eq(false, M._is_checkbox "- Task 1")
-  eq(false, M._is_checkbox "-- Task 1")
-  eq(true, M._is_checkbox "-- [ ] Task 1") -- TODO: bit shaky for now, but allows toggling in block quotes.
-  eq(false, M._is_checkbox "* Task 2")
-  eq(true, M._is_checkbox "++ [ ] Task 2")
-  eq(false, M._is_checkbox "1. Task 3")
-  eq(false, M._is_checkbox "1.1 Task 3")
-  eq(false, M._is_checkbox "1.1 [ ] Task 3")
-  eq(false, M._is_checkbox "1)1 Task 3")
-  eq(false, M._is_checkbox "Random text")
+  eq(false, M.is_checkbox "- Task 1")
+  eq(false, M.is_checkbox "-- Task 1")
+  eq(true, M.is_checkbox "-- [ ] Task 1") -- TODO: bit shaky for now, but allows toggling in block quotes.
+  eq(false, M.is_checkbox "* Task 2")
+  eq(true, M.is_checkbox "++ [ ] Task 2")
+  eq(false, M.is_checkbox "1. Task 3")
+  eq(false, M.is_checkbox "1.1 Task 3")
+  eq(false, M.is_checkbox "1.1 [ ] Task 3")
+  eq(false, M.is_checkbox "1)1 Task 3")
+  eq(false, M.is_checkbox "Random text")
 end
 
 T["is_checkbox"]["should handle leading spaces correctly"] = function()
-  eq(true, M._is_checkbox "  - [ ] Task 1")
-  eq(true, M._is_checkbox "    * [ ] Task 2")
-  eq(true, M._is_checkbox "     5. [ ] Task 2")
+  eq(true, M.is_checkbox "  - [ ] Task 1")
+  eq(true, M.is_checkbox "    * [ ] Task 2")
+  eq(true, M.is_checkbox "     5. [ ] Task 2")
 
-  eq(false, M._is_checkbox "    - Task 1")
-  eq(false, M._is_checkbox "    * Task 1")
-  eq(false, M._is_checkbox "    1. Task 1")
+  eq(false, M.is_checkbox "    - Task 1")
+  eq(false, M.is_checkbox "    * Task 1")
+  eq(false, M.is_checkbox "    1. Task 1")
 end
 
 T["is_whitespace"] = function()
