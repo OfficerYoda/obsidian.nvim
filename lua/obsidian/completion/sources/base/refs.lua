@@ -84,7 +84,9 @@ function RefsSourceBase:process_completion(cc)
     }
 
     search.find_notes_async(cc.search, function(results)
-      self:process_search_results(cc, results)
+      vim.schedule(function()
+        self:process_search_results(cc, results)
+      end)
     end, {
       dir = cc.root,
       search = search_opts,
