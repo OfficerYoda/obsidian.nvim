@@ -6,15 +6,16 @@ local M = {}
 M.injected_once = false
 
 M.providers = {
-  { name = "obsidian", module = "obsidian.completion.sources.blink.refs" },
-  { name = "obsidian_tags", module = "obsidian.completion.sources.blink.tags" },
+  { name = "obsidian", module = "obsidian.completion.sources.blink.refs", score_offset = 100 },
+  { name = "obsidian_tags", module = "obsidian.completion.sources.blink.tags", score_offset = 50 },
 }
 
-local function add_provider(blink, provider_name, provider_module)
+local function add_provider(blink, provider_name, provider_module, score_offset)
   local add_source_provider = blink.add_source_provider or blink.add_provider
   add_source_provider(provider_name, {
     name = provider_name,
     module = provider_module,
+    score_offset = score_offset,
     async = true,
     opts = {},
     enabled = function()
@@ -31,11 +32,14 @@ function M.register_providers()
   local blink = require "blink.cmp"
 
   if Obsidian.opts.completion.create_new then
-    table.insert(M.providers, { name = "obsidian_new", module = "obsidian.completion.sources.blink.new" })
+    table.insert(
+      M.providers,
+      { name = "obsidian_new", module = "obsidian.completion.sources.blink.new", score_offset = -100 }
+    )
   end
 
   for _, provider in pairs(M.providers) do
-    add_provider(blink, provider.name, provider.module)
+    add_provider(blink, provider.name, provider.module, provider.score_offset)
   end
 end
 
