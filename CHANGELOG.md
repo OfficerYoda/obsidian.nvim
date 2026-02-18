@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [v3.15.10](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.10) - 2026-02-18
+
 ### Added
 
 - `:Obsidian tags` and `api.cursor_tag` will work for tags in frontmatter.
