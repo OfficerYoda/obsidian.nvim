@@ -1,4 +1,3 @@
-local iter = vim.iter
 local log = require "obsidian.log"
 local legacycommands = require "obsidian.commands.init-legacy"
 
@@ -130,8 +129,10 @@ M.handle_command = function(data)
   cmdconfig.func(data)
 end
 
+---@param arg_lead string
 ---@param cmdline string
-M.get_completions = function(cmdline)
+---@param cursor_pos number
+M.get_completions = function(arg_lead, cmdline, cursor_pos)
   local obspat = "^['<,'>]*Obsidian[!]?"
   local splitcmd = vim.split(cmdline, " ", { plain = true, trimempty = true })
   local obsidiancmd = splitcmd[2]
@@ -148,63 +149,45 @@ M.get_completions = function(cmdline)
   if cmdconfig == nil then
     return
   end
-  if cmdline:match(obspat .. "%s%S*%s%S*$") then
-    local cmd_arg = table.concat(vim.list_slice(splitcmd, 3), " ")
+  if cmdline:match(obspat .. "%s%S+%s.*$") then
     local complete_type = type(cmdconfig.complete)
     if complete_type == "function" then
-      return cmdconfig.complete(cmd_arg)
+      return cmdconfig.complete(arg_lead, cmdline, cursor_pos)
     end
     if complete_type == "string" then
+      local cmd_arg = table.concat(vim.list_slice(splitcmd, 3), " ")
       return vim.fn.getcompletion(cmd_arg, cmdconfig.complete)
     end
   end
 end
 
---TODO: Note completion is currently broken (see: https://github.com/epwalsh/obsidian.nvim/issues/753)
+---@param _ string
+---@param cmdline string
 ---@return string[]
-M.note_complete = function(cmd_arg)
+M.note_complete = function(_, cmdline)
   local search = require "obsidian.search"
-  local query
-  if string.len(cmd_arg) > 0 then
-    if string.find(cmd_arg, "|", 1, true) then
-      return {}
-    else
-      query = cmd_arg
-    end
-  else
-    local _, csrow, cscol, _ = unpack(assert(vim.fn.getpos "'<"))
-    local _, cerow, cecol, _ = unpack(assert(vim.fn.getpos "'>"))
-    local lines = vim.fn.getline(csrow, cerow)
-    assert(type(lines) == "table", "")
+  local completions = {}
 
-    if #lines > 1 then
-      lines[1] = string.sub(lines[1], cscol)
-      lines[#lines] = string.sub(lines[#lines], 1, cecol)
-    elseif #lines == 1 then
-      lines[1] = string.sub(lines[1], cscol, cecol)
-    else
-      return {}
-    end
+  local query = cmdline:match "^%S+%s%S+%s(.*)$" or ""
 
-    query = table.concat(lines, " ")
+  if query == "" then
+    return {}
   end
 
-  local completions = {}
-  local query_lower = string.lower(query)
-  for note in iter(search.find_notes(query, { search = { sort = true } })) do
+  -- if there's already partial query that ended with a space, then we should search for the query instead of note names
+  local query_results = search.find_notes(query, { search = { sort = true } })
+
+  for _, note in ipairs(query_results) do
     local note_path = assert(note.path:vault_relative_path { strict = true })
-    if string.find(string.lower(note:display_name()), query_lower, 1, true) then
-      table.insert(completions, note:display_name() .. "  " .. tostring(note_path))
-    else
+    table.insert(completions, note:display_name() .. "  " .. tostring(note_path))
+    if not vim.tbl_isempty(note.aliases) then
       for _, alias in pairs(note.aliases) do
-        if string.find(string.lower(alias), query_lower, 1, true) then
-          table.insert(completions, alias .. "  " .. tostring(note_path))
-          break
-        end
+        table.insert(completions, alias .. "  " .. tostring(note_path))
       end
     end
   end
 
+  completions = vim.fn.matchfuzzy(completions, query, { limit = 10 })
   return completions
 end
 
@@ -224,7 +207,7 @@ M.register("dailies", { nargs = "*" })
 
 M.register("new", { nargs = "*" })
 
-M.register("open", { nargs = "?", complete = M.note_complete })
+M.register("open", { nargs = "*", complete = M.note_complete })
 
 M.register("tags", { nargs = "*" })
 

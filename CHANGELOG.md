@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed markdown backlinks, so they are properly located with regex and respect to anchoring
 - Template substitutions revert to support string values.
+- Cmdline completion will work for multiple arguments.
+- `:Obsidian open`'s argument completion will work.
 
 ## [v3.15.9](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.9) - 2026-02-13
 
