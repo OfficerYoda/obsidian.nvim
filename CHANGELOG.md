@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [v3.15.10](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.10) - 2026-02-18
+
+### Added
+
+- `:Obsidian tags` and `api.cursor_tag` will work for tags in frontmatter.
+
+### Fixed
+
+- Fixed markdown backlinks, so they are properly located with regex and respect to anchoring
+- Template substitutions revert to support string values.
+- Cmdline completion will work for multiple arguments.
+- `:Obsidian open`'s argument completion will work.
+
+## [v3.15.9](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.9) - 2026-02-13
+
 ### Added
 
 - Added support for moment.js style date format for:
@@ -16,6 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `opts.daily_notes.alias_format`
 - `actions.start_presentation`.
 - Support for template substitution suffix, like `{{date:YY}}`
+- `actions.new`.
+
+### Changed
+
+- `:Obsidian new` will act like `new_from_template` and write new note to disk.
 
 ### Fixed
 
@@ -23,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Goto definition should not throw error if templates.folder is not set.
 - Fixed completion insertion misaligned under CJK languages
 - Fixed completion references source unable to fetch by rolling back the `find_workspace` function in `Path.vault_relative_path`
+- Fixed custom `templates.substitutions` (and other nested config tables like
+  `ui.checkboxes`) silently replacing defaults instead of merging with them.
 
 ## [v3.15.8](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.15.8) - 2026-02-04
 
@@ -692,7 +714,7 @@ There's a lot of new features and improvements here that I'm really excited abou
    We also support links to headers within the same note, like for a table of contents, e.g. `[[#Heading 1]]`, `[[#heading-1|Heading]]`, `[[#^block-1]]`.
 
 1. 📲 A basic callback system to let you easily customize obisidian.nvim's behavior even more. There are currently 4 events: `post_setup`, `enter_note`, `pre_write_note`, and `post_set_workspace`. You can define a function for each of these in your config.
-2. 🔭 Improved picker integrations (especially for telescope), particular for the `:ObsidianTags` command. See <https://github.com/epwalsh/obsidian.nvim/discussions/450> for a demo.
+1. 🔭 Improved picker integrations (especially for telescope), particular for the `:ObsidianTags` command. See <https://github.com/epwalsh/obsidian.nvim/discussions/450> for a demo.
 
 Full changelog below 👇
 
